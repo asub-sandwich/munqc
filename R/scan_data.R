@@ -1,3 +1,19 @@
+#' @keywords internal
+"_PACKAGE"
+
+#' Create a munqc scan data table
+#' 
+#' The primary way to create a validated scan data object from vectors or pre-loaded dataframe.
+#' Data can be provided using one of two schemes:
+#' * **condensed munsell:** columns `Chip`, `L*`, `a*`, `b*`
+#' * **expanded munsell:** columns `Hue`, `Value`, `Chroma`, `L*`, `a*`, `b*`
+#' 
+#' @param data A data frame containing at Lab coordinates and at least one Munsell chip identifier scheme. May be the result of [base::read.csv()], [read_scan_file()], or [data.frame()].
+#' @param sensor Character string naming the sensor used. Currently, supported sensors are (`"veykolor"`, `"nix"`, `"colormuse"`, `"konicaminolta"`). Matching a sensor used in the reference dataset is important for accuracy.
+#' @param chip_col Name of the chip ID column when usig chip-only scheme. Defaults to `"chip"`.
+#' @param L_col,a_col,b_col Column names for L\*, a\*, and b\* values. Defaults to `"L"`, `"a"`, `"b"`.
+#' @param hue_col,value_col,chroma_col Column names for Munsell hue, value, and chroma when using expanded munsell scheme. Defaults to `"h"`, `"v"`, `"c"`.
+#' 
 new_scan_collection <- function(
   data,
   sensor,
