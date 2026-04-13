@@ -39,7 +39,7 @@
 #' @param chip.col Name of the chip ID column when usig chip-only scheme. Defaults to `"chip"`.
 #' @param L.col,a.col,b.col Column names for L\*, a\*, and b\* values. Defaults to `"L"`, `"a"`, `"b"`.
 #' @param hue.col,value.col,chroma.col Column names for Munsell hue, value, and chroma when using expanded munsell scheme. Defaults to `"h"`, `"v"`, `"c"`.
-#' @param glossy.col Character string that describes the finish of the scanned chip, one of (`"matte"`, `"semiglossy"`, `"glossy"`). Defaults to `matte`. Only used to ensure that the glossiness of scanned chips is comparable to the reference dataset.
+#' @param gloss.col Character string that describes the finish of the scanned chip, one of (`"matte"`, `"semiglossy"`, `"glossy"`). Defaults to `matte`. Only used to ensure that the glossiness of scanned chips is comparable to the reference dataset.
 #'
 #' @return A `scan.collection` tibble with standardized columns:
 #'   * `chip.id` - character chip identifier
@@ -73,14 +73,14 @@
 munq.scan <- function(
   data,
   sensor,
-  glossy,
   chip.col = "chip",
   L.col = "L",
   a.col = "a",
   b.col = "b",
   hue.col = "h",
   value.col = "v",
-  chroma.col = "c"
+  chroma.col = "c",
+  gloss.col = "gloss"
 ) {
   data <- as.data.frame(data)
   nms <- names(data)
