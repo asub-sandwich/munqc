@@ -8,30 +8,30 @@
 munq.scan(
   data,
   sensor,
-  glossy,
   chip.col = "chip",
   L.col = "L",
   a.col = "a",
   b.col = "b",
   hue.col = "h",
   value.col = "v",
-  chroma.col = "c"
+  chroma.col = "c",
+  gloss.col = "gloss"
 )
 
 scan_from_vectors(sensor, chip = NULL, h = NULL, v = NULL, c = NULL, L, a, b)
 }
 \arguments{
-\item{data}{A data frame containing at Lab coordinates and at least one Munsell chip identifier scheme. May be the result of \code{\link[base:read.csv]{base::read.csv()}}, \code{\link[=read.scan.file]{read.scan.file()}}, or \code{\link[=data.frame]{data.frame()}}.}
+\item{data}{A data frame containing at Lab coordinates and at least one Munsell chip identifier scheme. May be the result of \code{read.csv()}, \code{read.scan.file()}, or \code{data.frame()}.}
 
 \item{sensor}{Character string naming the sensor used. Currently, supported sensors are (\code{"veykolor"}, \code{"nix"}, \code{"colormuse"}, \code{"konicaminolta"}). Matching a sensor used in the reference dataset is important for accuracy.}
 
 \item{chip.col}{Name of the chip ID column when usig chip-only scheme. Defaults to \code{"chip"}.}
 
-\item{L.col, a.col, b.col}{Column names for L\\emph{, a\}, and b\* values. Defaults to \code{"L"}, \code{"a"}, \code{"b"}.}
+\item{L.col, a.col, b.col}{Column names for L, a, and b values. Defaults to \code{"L"}, \code{"a"}, \code{"b"}.}
 
 \item{hue.col, value.col, chroma.col}{Column names for Munsell hue, value, and chroma when using expanded munsell scheme. Defaults to \code{"h"}, \code{"v"}, \code{"c"}.}
 
-\item{glossy.col}{Character string that describes the finish of the scanned chip, one of (\code{"matte"}, \code{"semiglossy"}, \code{"glossy"}). Defaults to \code{matte}. Only used to ensure that the glossiness of scanned chips is comparable to the reference dataset.}
+\item{gloss.col}{Character string that describes the finish of the scanned chip, one of (\code{"matte"}, \code{"semiglossy"}, \code{"glossy"}). Defaults to \code{matte}. Only used to ensure that the glossiness of scanned chips is comparable to the reference dataset.}
 
 \item{...}{Named vectors for each column, passed directly. Column names must
 follow the same conventions as \code{new.scan()}. A \code{sensor} argument is
@@ -42,7 +42,7 @@ A \code{scan.collection} tibble with standardized columns:
 \itemize{
 \item \code{chip.id} - character chip identifier
 \item \code{hue}, \code{value}, \code{chroma} - Munsell Notation
-\item \code{L}, \code{a}, \code{b} - CIE L\*a\\emph{b\} coordinates. Not to be confused with Hunter Lab coordinates.
+\item \code{L}, \code{a}, \code{b} - CIE Lab coordinates. Not to be confused with Hunter Lab coordinates.
 \item \code{sensor} - The supplied sensor identifier
 \item \code{gloss} - The supplied glossiness of the chip
 }
@@ -51,8 +51,8 @@ A \code{scan.collection} tibble with standardized columns:
 The primary way to create a validated scan data object from vectors or pre-loaded dataframe.
 Data can be provided using one of two schemes:
 \itemize{
-\item \strong{condensed munsell:} columns \code{Chip}, \verb{L*}, \verb{a*}, \verb{b*}
-\item \strong{expanded munsell:} columns \code{Hue}, \code{Value}, \code{Chroma}, \verb{L*}, \verb{a*}, \verb{b*}
+\item \strong{condensed munsell:} columns \code{Chip}, \code{L}, \code{a}, \code{b}
+\item \strong{expanded munsell:} columns \code{Hue}, \code{Value}, \code{Chroma}, \code{L}, \code{a}, \code{b}
 }
 }
 \examples{
