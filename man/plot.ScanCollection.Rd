@@ -6,7 +6,7 @@
 \usage{
 \method{plot}{ScanCollection}(
   x,
-  type = c("histogram", "ecdf", "page"),
+  type = c("histogram", "ecdf", "page", "finish"),
   binwidth = 0.25,
   facet_books = TRUE,
   ...
@@ -16,10 +16,12 @@
 \item{x}{A \code{ScanCollection} that has been through \code{\link[=compute_error]{compute_error()}}.}
 
 \item{type}{One of \code{"histogram"} (distribution of \eqn{\Delta E_{00}} with
-threshold bands shaded behind it), \code{"ecdf"} (cumulative distribution,
-read off what fraction of chips passes at \emph{any} threshold),
-or \code{"page"} (one row per Munsell hue page, so a
-single bad page stands out).}
+threshold bands shaded behind it), \code{"ecdf"} (cumulative distribution, so
+you can read off what fraction of chips passes at \emph{any} threshold, not
+just the one you chose), \code{"page"} (one row per Munsell hue page, so a
+single bad page stands out), or \code{"finish"} (one row per surface finish,
+which shows at a glance whether a book's problems are confined to its
+glossy chips).}
 
 \item{binwidth}{Histogram bin width. Defaults to \code{0.25}.}
 

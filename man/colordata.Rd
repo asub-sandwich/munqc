@@ -5,7 +5,7 @@
 \alias{colordata}
 \title{Color Data}
 \format{
-A data.frame with 412 rows and 6 variables
+A data.frame with 412 rows and 5 variables
 \describe{
 \item{sensor}{The color sensor name}
 \item{chip}{The Munsell notation of the color chip}

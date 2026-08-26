@@ -7,7 +7,7 @@ MUNSELL_RE <- "^\\s*([0-9]+(?:\\.[0-9]+)?[A-Za-z]+)\\s+([0-9]+(?:\\.[0-9]+)?)/([
 #' Returns `NA` for anything that does not parse, so callers can decide whether
 #' to warn or stop.
 #' @noRd
-.normalise_chip <- function(chip) {
+.normalize_chip <- function(chip) {
   chip <- trimws(as.character(chip))
   m <- regmatches(chip, regexec(MUNSELL_RE, chip))
   vapply(
@@ -60,4 +60,40 @@ utils::globalVariables(c(
     out[need] <- chipfinish$finish[match(chip[need], chipfinish$chip)]
   }
   out
+}
+
+# A scan that is byte-identical to the reference, so any non-zero dE is a bug.
+perfect_scan <- function(book_id = "b1", sensor = "nix") {
+  ref <- colordata[colordata$sensor == sensor, ]
+  data.frame(
+    book_id = book_id,
+    chip = ref$chip,
+    L = ref$L,
+    a = ref$a,
+    b = ref$b,
+    stringsAsFactors = FALSE
+  )
+}
+
+# Shift every chip of a given finish far enough to fail.
+nudge_finish <- function(df, finish, dL = 6) {
+  hit <- df$chip %in% chipfinish$chip[chipfinish$finish == finish]
+  df$L[hit] <- df$L[hit] + dL
+  df
+}
+
+nudge_hue <- function(df, hue, dL = 6) {
+  hit <- startsWith(df$chip, paste0(hue, " "))
+  df$L[hit] <- df$L[hit] + dL
+  df
+}
+
+nix_scan <- function(df) {
+  scan_collection(df, sensor = "nix", illuminant = "D65", observer = 10)
+}
+
+write_tmp_csv <- function(df, ext = ".csv") {
+  f <- tempfile(fileext = ext)
+  utils::write.csv(df, f, row.names = FALSE)
+  f
 }

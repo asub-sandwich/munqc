@@ -4,12 +4,13 @@
 \alias{munq_thresholds}
 \alias{is_munq_thresholds}
 \alias{print.munq_thresholds}
-\title{Quality-control thresholds}
+\title{Quality-control thresholds and policy}
 \usage{
 munq_thresholds(
   breaks = c(1, 2, 3, 5),
-  labels = c("imperceptible", "perceptible by some", "acceptable", "marginal", "replace"),
-  fail_at = 3
+  labels = c("imperceptible", "perceptible", "acceptable", "marginal", "replace"),
+  fail_at = 3,
+  decisive = "matte"
 )
 
 is_munq_thresholds(x)
@@ -22,9 +23,14 @@ is_munq_thresholds(x)
 \item{labels}{Character vector naming each band. Must be one longer than
 \code{breaks}.}
 
-\item{fail_at}{Numeric scalar. Chips at or above this distance are failed.
-Must be one of \code{breaks}, so that the pass/fail line always coincides with
-a band edge.}
+\item{fail_at}{Either a single number applied to every finish, or a named
+numeric vector giving a per-finish cut, e.g.
+\code{c(matte = 3, semigloss = 4, gloss = 5)}. Unnamed finishes inherit the
+\code{matte} value. Every value must be one of \code{breaks}, so the pass/fail line
+always coincides with a band edge.}
+
+\item{decisive}{Character vector of finishes that count towards a book or
+page verdict. Defaults to \code{"matte"}.}
 
 \item{x}{A \code{munq_thresholds} object.}
 
@@ -35,36 +41,34 @@ An object of class \code{munq_thresholds}.
 }
 \description{
 Defines the CIEDE2000 (\eqn{\Delta E_{00}}) cut points used to grade colour
-chips. A single \code{munq_thresholds} object is shared by \code{\link[=compute_error]{compute_error()}},
-\code{\link[=qc_summary]{qc_summary()}} and the plotting methods.
+chips, and which chips are allowed to condemn a whole book. A single
+\code{munq_thresholds} object is shared by \code{\link[=compute_error]{compute_error()}}, \code{\link[=qc_summary]{qc_summary()}} and
+the plotting methods.
 }
 \details{
-Because everyone's eyes are different, there is not a single "hard threshold"
-that determines good from bad. Instead, there are two ways to break up the data.
+Because color is subjective, and there is no single value that determines
+good versus bad when judging color books, there are three separate ideas
+to help the user determine for themselves what is "good" and "bad".
 \itemize{
 \item \code{breaks} are \emph{descriptive} bands, used for grading and for shading plots.
-\item \code{fail_at} is the single \emph{decision} cut. A chip is failed when its
-\eqn{\Delta E_{00}} is greater than or equal to \code{fail_at}.
+They are always global, so every plot shares one colour scheme.
+\item \code{fail_at} is the \emph{decision} cut for an individual chip. A chip fails when
+its \eqn{\Delta E_{00}} is at or above the cut. This may vary by finish.
+\item \code{decisive} names the finishes that count towards a book's verdict.
+.
 }
-
-The default \code{fail_at = 3} seems to be a liberal estimate found from many
-industry sources, and is well above the measurement noise floor
-observed in \link{colordata_raw}: across three brand-new books, the median
-chip-to-reference distance is 0.09-0.23 depending on sensor, and the 95th
-percentile stays below 1.0. See \code{vignette("thresholds")} (TODO) for the
-derivation.
 }
 \examples{
 munq_thresholds()
 
-# Stricter: fail anything a trained observer could see at all
-munq_thresholds(fail_at = 1)
+# Loosen the per-chip cut on glossy chips as well as excluding them
+# from the verdict
+munq_thresholds(fail_at = c(matte = 3, semigloss = 3, gloss = 5))
 
-# Custom bands
-munq_thresholds(
-  breaks = c(2, 4),
-  labels = c("keep", "watch", "replace"),
-  fail_at = 4
-)
+# Let semigloss count towards the verdict too
+munq_thresholds(decisive = c("matte", "semigloss"))
+
+# Stricter throughout
+munq_thresholds(fail_at = 1)
 
 }

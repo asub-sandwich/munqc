@@ -9,21 +9,28 @@ qc_summary(x, max_fail_frac = 0.05)
 \arguments{
 \item{x}{A \code{ScanCollection} that has been through \code{\link[=compute_error]{compute_error()}}.}
 
-\item{max_fail_frac}{Proportion of failing chips above which a page or book
-is flagged. Defaults to \code{0.05}.}
+\item{max_fail_frac}{Proportion of failing decisive chips above which a page
+or book is flagged. Defaults to \code{0.05}.}
 }
 \value{
-A list of three \code{data.frame}s: \code{chip}, \code{page}, and \code{book}.
+A list of four \code{data.frame}s: \code{chip}, \code{page}, \code{finish}, and \code{book}.
+The \code{book} table carries a \code{verdict} column of \code{"pass"} or \code{"replace"}.
 }
 \description{
-Aggregates the chip-level output of \code{\link[=compute_error]{compute_error()}} to page ("10YR")
-and book levels.
+Aggregates the chip-level output of \code{\link[=compute_error]{compute_error()}} to a page (10YR) or
+an entire book.
 }
 \details{
-A page or book is flagged when \emph{either} its failure rate exceeds
-\code{max_fail_frac} \emph{or} its 95th-percentile chip distance exceeds
-\code{thresholds$fail_at}. The first catches books that are uniformly drifting;
-the second catches books that are fine except for a cluster of ruined chips.
+Only chips whose finish is listed in \code{thresholds$decisive} count towards a
+page or book verdict. By default, this is matte chips only, so a book
+whose matte chips are sound is not condemned because the few glossy
+chips read badly on a sensor. Non-decisive chips are still scored and
+reported, in \verb{$finish} and in the advisory columns of \verb{$book}.
+
+A page or book is flagged when \emph{either} the failure rate among its decisive
+chips exceeds \code{max_fail_frac} \emph{or} their 95th-percentile distance reaches
+the relevant \code{fail_at}. The first catches uniform drift; the second catches
+a book that is fine except for a cluster of ruined chips.
 }
 \examples{
 df <- data.frame(

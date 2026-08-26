@@ -36,5 +36,5 @@ compute_error(sc, munq_thresholds(fail_at = 1))
 
 }
 \seealso{
-\code{\link[=qc_summary]{qc_summary()}} for book- and page-level information.
+\code{\link[=qc_summary]{qc_summary()}} for book- and page-level rollups.
 }

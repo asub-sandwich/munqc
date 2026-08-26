@@ -13,59 +13,62 @@ FINISHES <- c("matte", "semigloss", "gloss")
   out
 }
 
-#' Quality-control thresholds
+#' Quality-control thresholds and policy
 #'
 #' Defines the CIEDE2000 (\eqn{\Delta E_{00}}) cut points used to grade colour
-#' chips. A single `munq_thresholds` object is shared by [compute_error()],
-#' [qc_summary()] and the plotting methods.
+#' chips, and which chips are allowed to condemn a whole book. A single
+#' `munq_thresholds` object is shared by [compute_error()], [qc_summary()] and
+#' the plotting methods.
 #'
-#' Because everyone's eyes are different, there is not a single "hard threshold"
-#' that determines good from bad. Instead, there are two ways to break up the data.
+#' Because color is subjective, and there is no single value that determines
+#' good versus bad when judging color books, there are three separate ideas
+#' to help the user determine for themselves what is "good" and "bad".
 #'
 #' * `breaks` are *descriptive* bands, used for grading and for shading plots.
-#' * `fail_at` is the single *decision* cut. A chip is failed when its
-#'   \eqn{\Delta E_{00}} is greater than or equal to `fail_at`.
-#'
-#' The default `fail_at = 3` seems to be a liberal estimate found from many
-#' industry sources, and is well above the measurement noise floor
-#' observed in [colordata_raw]: across three brand-new books, the median
-#' chip-to-reference distance is 0.09-0.23 depending on sensor, and the 95th
-#' percentile stays below 1.0. See `vignette("thresholds")` (TODO) for the
-#' derivation.
+#'   They are always global, so every plot shares one colour scheme.
+#' * `fail_at` is the *decision* cut for an individual chip. A chip fails when
+#'   its \eqn{\Delta E_{00}} is at or above the cut. This may vary by finish.
+#' * `decisive` names the finishes that count towards a book's verdict.
+#'.
 #'
 #' @param breaks Increasing, strictly positive numeric vector of band edges.
 #' @param labels Character vector naming each band. Must be one longer than
 #'   `breaks`.
-#' @param fail_at Numeric scalar. Chips at or above this distance are failed.
-#'   Must be one of `breaks`, so that the pass/fail line always coincides with
-#'   a band edge.
+#' @param fail_at Either a single number applied to every finish, or a named
+#'   numeric vector giving a per-finish cut, e.g.
+#'   `c(matte = 3, semigloss = 4, gloss = 5)`. Unnamed finishes inherit the
+#'   `matte` value. Every value must be one of `breaks`, so the pass/fail line
+#'   always coincides with a band edge.
+#' @param decisive Character vector of finishes that count towards a book or
+#'   page verdict. Defaults to `"matte"`.
 #'
 #' @return An object of class `munq_thresholds`.
 #'
 #' @examples
 #' munq_thresholds()
 #'
-#' # Stricter: fail anything a trained observer could see at all
-#' munq_thresholds(fail_at = 1)
+#' # Loosen the per-chip cut on glossy chips as well as excluding them
+#' # from the verdict
+#' munq_thresholds(fail_at = c(matte = 3, semigloss = 3, gloss = 5))
 #'
-#' # Custom bands
-#' munq_thresholds(
-#'   breaks = c(2, 4),
-#'   labels = c("keep", "watch", "replace"),
-#'   fail_at = 4
-#' )
+#' # Let semigloss count towards the verdict too
+#' munq_thresholds(decisive = c("matte", "semigloss"))
+#'
+#' # Stricter throughout
+#' munq_thresholds(fail_at = 1)
 #'
 #' @export
 munq_thresholds <- function(
   breaks = c(1, 2, 3, 5),
   labels = c(
     "imperceptible",
-    "perceptible by some",
+    "perceptible",
     "acceptable",
     "marginal",
     "replace"
   ),
-  fail_at = 3
+  fail_at = 3,
+  decisive = "matte"
 ) {
   if (!is.numeric(breaks) || length(breaks) < 1L || anyNA(breaks)) {
     stop(
@@ -89,25 +92,84 @@ munq_thresholds <- function(
       call. = FALSE
     )
   }
-  if (!is.numeric(fail_at) || length(fail_at) != 1L || is.na(fail_at)) {
-    stop("`fail_at` must be a single non-missing number.", call. = FALSE)
+
+  if (!is.numeric(fail_at) || anyNA(fail_at) || length(fail_at) == 0L) {
+    stop("`fail_at` must be numeric with no missing values.", call. = FALSE)
   }
-  if (!any(abs(breaks - fail_at) < .Machine$double.eps^0.5)) {
+  if (is.null(names(fail_at))) {
+    if (length(fail_at) != 1L) {
+      stop(
+        "Unnamed `fail_at` must be a single number. To vary it by finish, ",
+        "name the elements, e.g. c(matte = 3, gloss = 5).",
+        call. = FALSE
+      )
+    }
+    fail_at <- stats::setNames(rep(fail_at, length(FINISHES)), FINISHES)
+  } else {
+    unknown <- setdiff(names(fail_at), FINISHES)
+    if (length(unknown) > 0L) {
+      stop(
+        sprintf(
+          "Unknown finish%s in `fail_at`: %s. Known finishes: %s.",
+          if (length(unknown) > 1L) "es" else "",
+          paste(unknown, collapse = ", "),
+          paste(FINISHES, collapse = ", ")
+        ),
+        call. = FALSE
+      )
+    }
+    if (!"matte" %in% names(fail_at)) {
+      stop(
+        "A named `fail_at` must include `matte`, which unnamed finishes inherit.",
+        call. = FALSE
+      )
+    }
+    full <- stats::setNames(rep(fail_at[["matte"]], length(FINISHES)), FINISHES)
+    full[names(fail_at)] <- fail_at
+    fail_at <- full
+  }
+
+  off_band <- fail_at[
+    !vapply(
+      fail_at,
+      function(v) any(abs(breaks - v) < .Machine$double.eps^0.5),
+      logical(1)
+    )
+  ]
+  if (length(off_band) > 0L) {
     stop(
       sprintf(
-        "`fail_at` (%s) must be one of `breaks` (%s).",
-        format(fail_at),
+        "`fail_at` value%s %s not among `breaks` (%s).",
+        if (length(off_band) > 1L) "s" else "",
+        paste(format(off_band), collapse = ", "),
         paste(format(breaks), collapse = ", ")
       ),
       call. = FALSE
     )
   }
 
+  decisive <- as.character(decisive)
+  unknown <- setdiff(decisive, FINISHES)
+  if (length(unknown) > 0L) {
+    stop(
+      sprintf(
+        "Unknown finish%s in `decisive`: %s.",
+        if (length(unknown) > 1L) "es" else "",
+        paste(unknown, collapse = ", ")
+      ),
+      call. = FALSE
+    )
+  }
+  if (length(decisive) == 0L) {
+    stop("`decisive` must name at least one finish.", call. = FALSE)
+  }
+
   structure(
     list(
       breaks = as.numeric(breaks),
       labels = as.character(labels),
-      fail_at = as.numeric(fail_at)
+      fail_at = fail_at,
+      decisive = decisive
     ),
     class = "munq_thresholds"
   )
@@ -130,30 +192,41 @@ print.munq_thresholds <- function(x, ...) {
     format(edges[-length(edges)], trim = TRUE),
     format(edges[-1L], trim = TRUE)
   )
-  verdict <- ifelse(edges[-length(edges)] >= x$fail_at, "FAIL", "pass")
-
-  cat("<munq_thresholds>\n")
-  cat("Fail at dE2000 >=", format(x$fail_at), "\n\n")
+  cat("<munq_thresholds>\n\nBands\n")
   cat(
     paste0(
       "  ",
       formatC(x$labels, width = -max(nchar(x$labels))),
       "  ",
-      formatC(band, width = -max(nchar(band))),
-      "  ",
-      verdict,
+      band,
       collapse = "\n"
     ),
     "\n"
+  )
+
+  cat("\nA chip fails at dE2000 >=\n")
+  cat(
+    paste0(
+      "  ",
+      formatC(names(x$fail_at), width = -max(nchar(names(x$fail_at)))),
+      "  ",
+      format(x$fail_at),
+      ifelse(names(x$fail_at) %in% x$decisive, "", "   (advisory only)"),
+      collapse = "\n"
+    ),
+    "\n"
+  )
+
+  cat(
+    "\nBook verdict decided by: ",
+    paste(x$decisive, collapse = ", "),
+    "\n",
+    sep = ""
   )
   invisible(x)
 }
 
 #' Assign band labels to distances
-#'
-#' @param delta_e Numeric vector of CIEDE2000 distances.
-#' @param thresholds A `munq_thresholds` object.
-#' @return A factor with levels `thresholds$labels`.
 #' @noRd
 .grade <- function(delta_e, thresholds) {
   cut(

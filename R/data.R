@@ -25,7 +25,7 @@
 #' This dataset is used for comparisons with user scans, and is treated as the 'Truth'
 #' when judging user books.
 #'
-#' @format A data.frame with 412 rows and 6 variables
+#' @format A data.frame with 412 rows and 5 variables
 #' \describe{
 #' \item{sensor}{The color sensor name}
 #' \item{chip}{The Munsell notation of the color chip}
@@ -36,3 +36,24 @@
 #'
 #' @source TBD
 "colordata"
+
+#' Chip Finish
+#'
+#' This data.frame contains the percepted "finish" of the chips scanned
+#' from the reference munsell soil color books. The manufacturer of these
+#' books can finish the chip in one of `matte`, `semigloss`, or `gloss`.
+#' Due to limitations in most colorimeters, it is difficult to measure glossy
+#' chips accurately and repeatably. Further, it would seem these chips may
+#' degrade the quickest. For these reasons, the finish data is included to
+#' help users make appropriate decisions regarding the quality of their color books.
+#' Users may provide their own glossiness data if their books finishes differ from
+#' this dataset.
+#'
+#' @format a data.frame with 102 rows and 2 variables
+#' \describe{
+#' \item{chip}{The Munsell notation of the color chip}
+#' \item{finish}{The percieved colorchip finish}
+#' }
+#'
+#' @source TBD
+"chipfinish"
