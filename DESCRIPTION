@@ -13,7 +13,8 @@ Depends:
 LazyData: true
 Imports: 
     dplyr,
-    farver
+    farver,
+    magrittr
 Suggests:
     readxl,
     purrr,
