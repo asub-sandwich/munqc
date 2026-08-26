@@ -1,11 +1,10 @@
 Package: munqc
-Title: What the Package Does (One Line, Title Case)
+Title: Munsell Soil Color Book Quality Control
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+    person("Ada", "Subora", , "ada.subora@pm.me", role = c("aut", "cre"))
+Description: munqc allows for cheap and rapid testing of Munsell Soil Color Books with digital colorimeters. Users will be able to determine if chips, pages, or entire books need to be replaced by comparing color scans of their books with scans from brand new books.
+License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 8.0.0
@@ -14,6 +13,7 @@ Depends:
 LazyData: true
 Imports: 
     dplyr,
+    farver,
     purrr,
     readxl,
     stringr,

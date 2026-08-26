@@ -5,14 +5,14 @@
 \alias{colordata_raw}
 \title{Raw Color Data}
 \format{
-A data.frame with 1296 rows and 6 variables
+A data.frame with 1224 rows and 6 variables
 \describe{
 \item{replicate}{The replicate/book number}
 \item{sensor}{The color sensor name}
 \item{chip}{The Munsell notation of the color chip}
 \item{L}{CIELab L value}
 \item{a}{CIELab a value}
-\item{b}CIELab b value}
+\item{b}{CIELab b value}
 }
 }
 \source{

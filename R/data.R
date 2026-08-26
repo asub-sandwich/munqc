@@ -5,14 +5,14 @@
 #' This dataset is not directly used in this package, and is only included for the
 #' user to inspect the quality of the measurements.
 #'
-#' @format A data.frame with 1296 rows and 6 variables
+#' @format A data.frame with 1224 rows and 6 variables
 #' \describe{
 #' \item{replicate}{The replicate/book number}
 #' \item{sensor}{The color sensor name}
 #' \item{chip}{The Munsell notation of the color chip}
 #' \item{L}{CIELab L value}
 #' \item{a}{CIELab a value}
-#' \item{b}CIELab b value}
+#' \item{b}{CIELab b value}
 #' }
 #'
 #' @source TBD
