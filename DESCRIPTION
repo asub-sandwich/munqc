@@ -13,8 +13,9 @@ Depends:
 LazyData: true
 Imports: 
     dplyr,
-    farver,
-    purrr,
+    farver
+Suggests:
     readxl,
-    stringr,
-    tidyr
+    purrr,
+    tidyr,
+    stringr

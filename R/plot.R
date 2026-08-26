@@ -24,10 +24,12 @@
 #'
 #' @param x A `ScanCollection` that has been through [compute_error()].
 #' @param type One of `"histogram"` (distribution of \eqn{\Delta E_{00}} with
-#'   threshold bands shaded behind it), `"ecdf"` (cumulative distribution,
-#'   read off what fraction of chips passes at *any* threshold),
-#'   or `"page"` (one row per Munsell hue page, so a
-#'   single bad page stands out).
+#'   threshold bands shaded behind it), `"ecdf"` (cumulative distribution, so
+#'   you can read off what fraction of chips passes at *any* threshold, not
+#'   just the one you chose), `"page"` (one row per Munsell hue page, so a
+#'   single bad page stands out), or `"finish"` (one row per surface finish,
+#'   which shows at a glance whether a book's problems are confined to its
+#'   glossy chips).
 #' @param binwidth Histogram bin width. Defaults to `0.25`.
 #' @param facet_books Facet by `book_id` when more than one book is present.
 #' @param ... Ignored.
@@ -45,7 +47,7 @@
 #' @export
 plot.ScanCollection <- function(
   x,
-  type = c("histogram", "ecdf", "page"),
+  type = c("histogram", "ecdf", "page", "finish"),
   binwidth = 0.25,
   facet_books = TRUE,
   ...
@@ -71,8 +73,9 @@ plot.ScanCollection <- function(
   pal <- stats::setNames(.band_palette(length(th$labels)), th$labels)
   multi_book <- length(unique(res$book_id)) > 1L
 
+  # One dashed line per distinct fail cut, so a per-finish policy is visible.
   fail_line <- ggplot2::geom_vline(
-    xintercept = th$fail_at,
+    xintercept = unique(th$fail_at),
     linetype = "dashed",
     linewidth = 0.6,
     colour = "grey20"
@@ -102,11 +105,12 @@ plot.ScanCollection <- function(
         y = "Chips",
         title = "Colour difference from reference",
         subtitle = sprintf(
-          "%s  |  failing at dE >= %s: %d of %d chips",
+          "%s  |  %d of %d chips failing (%d decisive, %d advisory)",
           x$sensor,
-          format(th$fail_at),
           sum(res$fail),
-          nrow(res)
+          nrow(res),
+          sum(res$fail & res$decisive),
+          sum(res$fail & !res$decisive)
         )
       ),
 
@@ -154,6 +158,45 @@ plot.ScanCollection <- function(
         x = expression(Delta * E[00]),
         y = "Page (Munsell hue)",
         title = "Colour difference by page"
+      ),
+
+    finish = ggplot2::ggplot(res) +
+      ggplot2::geom_rect(
+        data = bands,
+        ggplot2::aes(xmin = .data$xmin, xmax = .data$xmax, fill = .data$grade),
+        ymin = -Inf,
+        ymax = Inf,
+        alpha = 0.18
+      ) +
+      ggplot2::geom_boxplot(
+        ggplot2::aes(
+          x = .data$delta_e_2000,
+          y = factor(.data$finish, levels = FINISHES)
+        ),
+        outlier.size = 1,
+        width = 0.55,
+        fill = "white",
+        colour = "grey15",
+        linewidth = 0.4
+      ) +
+      ggplot2::geom_jitter(
+        ggplot2::aes(
+          x = .data$delta_e_2000,
+          y = factor(.data$finish, levels = FINISHES)
+        ),
+        height = 0.12,
+        size = 0.7,
+        alpha = 0.4
+      ) +
+      fail_line +
+      ggplot2::labs(
+        x = expression(Delta * E[00]),
+        y = "Surface finish",
+        title = "Colour difference by chip finish",
+        subtitle = sprintf(
+          "Verdict decided by: %s",
+          paste(th$decisive, collapse = ", ")
+        )
       )
   )
 

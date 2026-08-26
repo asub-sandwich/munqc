@@ -1,3 +1,18 @@
+#' Recognised chip surface finishes, glossiest last
+#' @noRd
+FINISHES <- c("matte", "semigloss", "gloss")
+
+#' Coerce arbitrary finish labels to the canonical set
+#' @noRd
+.normalize_finish <- function(x) {
+  x <- gsub("[^a-z]", "", tolower(trimws(as.character(x))))
+  out <- rep(NA_character_, length(x))
+  out[x %in% c("matte", "matt", "flat", "dull")] <- "matte"
+  out[x %in% c("semigloss", "semi", "satin", "eggshell")] <- "semigloss"
+  out[x %in% c("gloss", "glossy", "shiny")] <- "gloss"
+  out
+}
+
 #' Quality-control thresholds
 #'
 #' Defines the CIEDE2000 (\eqn{\Delta E_{00}}) cut points used to grade colour
@@ -148,4 +163,33 @@ print.munq_thresholds <- function(x, ...) {
     right = FALSE,
     ordered_result = TRUE
   )
+}
+
+#' Per-chip fail cut, given each chip's finish
+#'
+#' Chips with an unrecognised or missing finish fall back to the matte cut and
+#' are treated as decisive, so an unlabelled chip is never quietly excused.
+#' @noRd
+.fail_cut <- function(finish, thresholds) {
+  finish <- as.character(finish)
+  finish[is.na(finish) | !finish %in% FINISHES] <- "matte"
+  unname(thresholds$fail_at[finish])
+}
+
+#' Whether each chip counts towards a book verdict
+#' @noRd
+.is_decisive <- function(finish, thresholds) {
+  finish <- as.character(finish)
+  finish[is.na(finish) | !finish %in% FINISHES] <- "matte"
+  finish %in% thresholds$decisive
+}
+
+#' Is a chip failing?
+#'
+#' Factored out so the boundary case is directly testable: a chip sitting
+#' exactly on its cut fails. Bands are left-closed, so this keeps grading and
+#' pass/fail agreeing at every edge.
+#' @noRd
+.is_fail <- function(delta_e, cut) {
+  delta_e >= cut
 }

@@ -25,7 +25,7 @@
   )
 }
 
-#' Row-wise CIE DE2000 between two Lab matrices
+#' Row-wise CIEDE2000 between two Lab matrices
 #'
 #' `farver::compare_colour()` returns the full `nrow(from)` x `nrow(to)`
 #' distance matrix. We only ever want the diagonal, so this walks the inputs in
@@ -62,9 +62,10 @@
   ref_illuminant,
   ref_observer
 ) {
-  # The observer is a property of the colour matching functions,
-  # and there is no way to convert Lab measured under the 1964 10 deg
-  # observer to the 1931 2 deg observer without the underlying spectra.
+  # The observer is a property of the colour matching functions, not just the
+  # white point. There is no way to convert Lab measured under the 1964 10 deg
+  # observer to the 1931 2 deg observer without the underlying spectra, so we
+  # refuse rather than silently returning plausible-looking numbers.
   if (!identical(as.integer(scan_observer), as.integer(ref_observer))) {
     stop(
       sprintf(
@@ -81,6 +82,12 @@
       ),
       call. = FALSE
     )
+  }
+
+  scan_data$finish_user <- if ("finish" %in% names(scan_data)) {
+    .normalize_finish(scan_data$finish)
+  } else {
+    NA_character_
   }
 
   joined <- merge(
@@ -145,6 +152,7 @@
     book_id = joined$book_id,
     chip = joined$chip,
     hue = .chip_hue(joined$chip),
+    finish = .chip_finish(joined$chip, joined$finish_user),
     L = joined$L_scan,
     a = joined$a_scan,
     b = joined$b_scan,
@@ -175,7 +183,7 @@
 #'   `hue`, the scanned and reference `L`/`a`/`b`, `delta_e_2000`, `grade`, and
 #'   `fail`.
 #'
-#' @seealso [qc_summary()] for book- and page-level information.
+#' @seealso [qc_summary()] for book- and page-level rollups.
 #'
 #' @examples
 #' df <- data.frame(
@@ -210,7 +218,9 @@ compute_error <- function(x, thresholds = munq_thresholds()) {
   )
 
   results$grade <- .grade(results$delta_e_2000, thresholds)
-  results$fail <- results$delta_e_2000 >= thresholds$fail_at
+  results$fail_at <- .fail_cut(results$finish, thresholds)
+  results$fail <- .is_fail(results$delta_e_2000, results$fail_at)
+  results$decisive <- .is_decisive(results$finish, thresholds)
 
   x$results <- results[order(results$book_id, results$hue, results$chip), ]
   rownames(x$results) <- NULL

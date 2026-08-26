@@ -88,10 +88,43 @@ if (nrow(outlier_report) > 0L) {
   print(as.data.frame(outlier_report), row.names = FALSE)
 }
 
-### Create the aggregated colordata
+### Create the aggregated colordata data.frame
 colordata <- colordata_raw %>%
   summarise(across(c(L, a, b), mean), .by = c(chip, sensor)) %>%
   arrange(sensor, chip)
+
+### Create the chip finish data.frame
+chipfinish <- read_excel(raw_data_path, sheet = "Glossiness") %>%
+  set_names(c("chip1", "finish1", "chip2", "finish2", "chip3", "finish3")) %>%
+  pivot_longer(
+    cols = everything(),
+    names_to = c(".value", "block"),
+    names_pattern = "^(chip|finish)(\\d+)$"
+  ) %>%
+  select(-block) %>%
+  filter(!is.na(chip)) %>%
+  mutate(
+    chip = str_squish(chip),
+    finish = str_to_lower(str_squish(finish))
+  ) %>%
+  arrange(chip)
+
+stopifnot(
+  !anyNA(chipfinish$finish),
+  all(chipfinish$finish %in% c("matte", "semigloss", "gloss")),
+  !any(duplicated(chipfinish$chip)),
+  setequal(chipfinish$chip, unique(colordata$chip))
+)
+
+message(
+  "Chip finishes: ",
+  paste(
+    names(table(chipfinish$finish)),
+    table(chipfinish$finish),
+    sep = "=",
+    collapse = ", "
+  )
+)
 
 ### Create the metadata data.frame
 metadata <- read_excel(raw_data_path, sheet = "Metadata", range = "A1:F5") %>%
@@ -114,3 +147,4 @@ stopifnot(
 usethis::use_data(colordata_raw, overwrite = TRUE)
 usethis::use_data(colordata, overwrite = TRUE)
 usethis::use_data(metadata, overwrite = TRUE)
+usethis::use_data(chipfinish, overwrite = TRUE)

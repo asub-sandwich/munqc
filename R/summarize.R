@@ -1,18 +1,25 @@
 #' Roll scored chips up to pages and books
 #'
-#' Aggregates the chip-level output of [compute_error()] to page ("10YR")
-#' and book levels.
+#' Aggregates the chip-level output of [compute_error()] to a page (10YR) or
+#' an entire book.
 #'
-#' A page or book is flagged when *either* its failure rate exceeds
-#' `max_fail_frac` *or* its 95th-percentile chip distance exceeds
-#' `thresholds$fail_at`. The first catches books that are uniformly drifting;
-#' the second catches books that are fine except for a cluster of ruined chips.
+#' Only chips whose finish is listed in `thresholds$decisive` count towards a
+#' page or book verdict. By default, this is matte chips only, so a book
+#' whose matte chips are sound is not condemned because the few glossy
+#' chips read badly on a sensor. Non-decisive chips are still scored and
+#' reported, in `$finish` and in the advisory columns of `$book`.
+#'
+#' A page or book is flagged when *either* the failure rate among its decisive
+#' chips exceeds `max_fail_frac` *or* their 95th-percentile distance reaches
+#' the relevant `fail_at`. The first catches uniform drift; the second catches
+#' a book that is fine except for a cluster of ruined chips.
 #'
 #' @param x A `ScanCollection` that has been through [compute_error()].
-#' @param max_fail_frac Proportion of failing chips above which a page or book
-#'   is flagged. Defaults to `0.05`.
+#' @param max_fail_frac Proportion of failing decisive chips above which a page
+#'   or book is flagged. Defaults to `0.05`.
 #'
-#' @return A list of three `data.frame`s: `chip`, `page`, and `book`.
+#' @return A list of four `data.frame`s: `chip`, `page`, `finish`, and `book`.
+#'   The `book` table carries a `verdict` column of `"pass"` or `"replace"`.
 #'
 #' @examples
 #' df <- data.frame(
@@ -34,6 +41,7 @@ qc_summary <- function(x, max_fail_frac = 0.05) {
   if (
     !is.numeric(max_fail_frac) ||
       length(max_fail_frac) != 1L ||
+      is.na(max_fail_frac) ||
       max_fail_frac < 0 ||
       max_fail_frac > 1
   ) {
@@ -44,35 +52,54 @@ qc_summary <- function(x, max_fail_frac = 0.05) {
   }
 
   res <- x$results
-  fail_at <- x$thresholds$fail_at
 
-  agg <- function(by) {
-    parts <- split(res, res[by], drop = TRUE, sep = "\r")
+  # Aggregate `rows` over `by`, judging only the decisive chips.
+  agg <- function(rows, by, judge = TRUE) {
+    parts <- split(rows, rows[by], drop = TRUE, sep = "\r")
     out <- do.call(
       rbind,
       lapply(parts, function(g) {
+        d <- g[g$decisive, , drop = FALSE]
+        adv <- g[!g$decisive, , drop = FALSE]
+        base <- if (judge && nrow(d) > 0L) d else g
         data.frame(
           g[1L, by, drop = FALSE],
           n_chips = nrow(g),
-          n_fail = sum(g$fail),
-          fail_frac = mean(g$fail),
-          median_de = stats::median(g$delta_e_2000),
-          p95_de = unname(stats::quantile(g$delta_e_2000, 0.95, type = 7)),
-          max_de = max(g$delta_e_2000),
-          worst_chip = g$chip[which.max(g$delta_e_2000)],
+          n_judged = if (judge) nrow(d) else nrow(g),
+          n_fail = sum(base$fail),
+          fail_frac = if (nrow(base) > 0L) mean(base$fail) else NA_real_,
+          median_de = stats::median(base$delta_e_2000),
+          p95_de = unname(stats::quantile(base$delta_e_2000, 0.95, type = 7)),
+          max_de = max(base$delta_e_2000),
+          worst_chip = base$chip[which.max(base$delta_e_2000)],
+          n_advisory = if (judge) nrow(adv) else 0L,
+          n_advisory_fail = if (judge) sum(adv$fail) else 0L,
           stringsAsFactors = FALSE
         )
       })
     )
-    out$flagged <- out$fail_frac > max_fail_frac | out$p95_de >= fail_at
+    out$flagged <- !is.na(out$fail_frac) &
+      (out$fail_frac > max_fail_frac |
+        out$p95_de >= min(x$thresholds$fail_at[x$thresholds$decisive]))
     rownames(out) <- NULL
     out[do.call(order, unname(out[by])), , drop = FALSE]
   }
 
+  book <- agg(res, "book_id")
+  book$verdict <- ifelse(book$flagged, "replace", "pass")
+
+  finish <- agg(res, c("book_id", "finish"), judge = FALSE)
+  finish$decisive <- finish$finish %in% x$thresholds$decisive
+  finish <- finish[, setdiff(
+    names(finish),
+    c("n_judged", "n_advisory", "n_advisory_fail", "flagged")
+  )]
+
   list(
     chip = res,
-    page = agg(c("book_id", "hue")),
-    book = agg("book_id")
+    page = agg(res, c("book_id", "hue")),
+    finish = finish,
+    book = book
   )
 }
 
@@ -87,12 +114,13 @@ summary.ScanCollection <- function(object, ...) {
 
 #' @export
 print.summary.ScanCollection <- function(x, ...) {
+  th <- x$thresholds
+  cat("<ScanCollection QC summary>\n")
+  cat("Sensor:   ", x$sensor, "\n", sep = "")
   cat(
-    "<ScanCollection QC summary>  sensor: ",
-    x$sensor,
-    "  fail at dE2000 >= ",
-    format(x$thresholds$fail_at),
-    "\n\n",
+    "Decisive: ",
+    paste(th$decisive, collapse = ", "),
+    "  (other finishes reported but advisory)\n\n",
     sep = ""
   )
 
@@ -107,13 +135,64 @@ print.summary.ScanCollection <- function(x, ...) {
     ))
   }
 
-  cat("\nBy book\n")
-  print(x$book, row.names = FALSE)
+  cat("\nBy finish\n")
+  print(
+    x$finish[, c(
+      "book_id",
+      "finish",
+      "n_chips",
+      "n_fail",
+      "median_de",
+      "p95_de",
+      "max_de",
+      "decisive"
+    )],
+    row.names = FALSE,
+    digits = 3
+  )
+
+  cat("\nVerdict\n")
+  print(
+    x$book[, c(
+      "book_id",
+      "n_judged",
+      "n_fail",
+      "fail_frac",
+      "p95_de",
+      "n_advisory_fail",
+      "verdict"
+    )],
+    row.names = FALSE,
+    digits = 3
+  )
+
+  adv <- sum(x$book$n_advisory_fail)
+  if (adv > 0L && !any(x$book$flagged)) {
+    cat(
+      "\nNote: ",
+      adv,
+      " non-decisive chip(s) failed but did not affect the ",
+      "verdict.\n",
+      sep = ""
+    )
+  }
 
   flagged <- x$page[x$page$flagged, , drop = FALSE]
   if (nrow(flagged) > 0L) {
     cat("\nFlagged pages\n")
-    print(flagged, row.names = FALSE)
+    print(
+      flagged[, c(
+        "book_id",
+        "hue",
+        "n_judged",
+        "n_fail",
+        "fail_frac",
+        "p95_de",
+        "worst_chip"
+      )],
+      row.names = FALSE,
+      digits = 3
+    )
   } else {
     cat("\nNo pages flagged.\n")
   }
