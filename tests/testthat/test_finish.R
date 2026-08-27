@@ -28,13 +28,13 @@ test_that("a user-supplied finish wins over the lookup", {
 })
 
 test_that("unknown chips fall back to matte and stay decisive", {
-  th <- munq_thresholds(fail_at = c(matte = 3, gloss = 5))
+  th <- munqc_thresholds(fail_at = c(matte = 3, gloss = 5))
   expect_equal(.fail_cut(NA_character_, th), 3)
   expect_true(.is_decisive(NA_character_, th))
   expect_true(.is_decisive("nonsense", th))
 })
 
 test_that("fail cuts follow finish", {
-  th <- munq_thresholds(fail_at = c(matte = 3, semigloss = 3, gloss = 5))
+  th <- munqc_thresholds(fail_at = c(matte = 3, semigloss = 3, gloss = 5))
   expect_equal(.fail_cut(c("matte", "gloss", "semigloss"), th), c(3, 5, 3))
 })

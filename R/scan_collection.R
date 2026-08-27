@@ -100,7 +100,7 @@ scan_collection <- function(
 #'
 #' @inheritParams scan_collection
 #' @param results Chip-level results from [compute_error()], or `NULL`.
-#' @param thresholds A [munq_thresholds()] object, or `NULL`.
+#' @param thresholds A [munqc_thresholds()] object, or `NULL`.
 #' @noRd
 new_scan_collection <- function(
   data,

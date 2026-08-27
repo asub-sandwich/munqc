@@ -22,7 +22,7 @@ test_that("a book bad only on glossy chips is NOT condemned", {
 
 test_that("the same book IS condemned when gloss is made decisive", {
   d <- nudge_finish(perfect_scan(), "gloss", dL = 20)
-  th <- munq_thresholds(decisive = c("matte", "gloss"))
+  th <- munqc_thresholds(decisive = c("matte", "gloss"))
   s <- qc_summary(compute_error(nix_scan(d), th))
   expect_equal(s$book$verdict, "replace")
 })
@@ -50,10 +50,10 @@ test_that("the finish table reports every finish present", {
 
 test_that("a loose gloss cut spares chips a tight one would fail", {
   d <- nudge_finish(perfect_scan(), "gloss", dL = 4)
-  tight <- compute_error(nix_scan(d), munq_thresholds(fail_at = 3))
+  tight <- compute_error(nix_scan(d), munqc_thresholds(fail_at = 3))
   loose <- compute_error(
     nix_scan(d),
-    munq_thresholds(fail_at = c(matte = 3, gloss = 5))
+    munqc_thresholds(fail_at = c(matte = 3, gloss = 5))
   )
   expect_true(sum(tight$results$fail) > sum(loose$results$fail))
 })

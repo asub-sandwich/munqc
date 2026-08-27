@@ -7,7 +7,6 @@ Description: munqc allows for cheap and rapid testing of Munsell Soil Color Book
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 8.0.0
 Depends: 
     R (>= 3.5)
 LazyData: true
@@ -22,3 +21,4 @@ Suggests:
     stringr,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
+Config/roxygen2/version: 8.1.0

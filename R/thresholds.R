@@ -17,7 +17,7 @@ FINISHES <- c("matte", "semigloss", "gloss")
 #'
 #' Defines the CIEDE2000 (\eqn{\Delta E_{00}}) cut points used to grade colour
 #' chips, and which chips are allowed to condemn a whole book. A single
-#' `munq_thresholds` object is shared by [compute_error()], [qc_summary()] and
+#' `munqc_thresholds` object is shared by [compute_error()], [qc_summary()] and
 #' the plotting methods.
 #'
 #' Because color is subjective, and there is no single value that determines
@@ -42,23 +42,23 @@ FINISHES <- c("matte", "semigloss", "gloss")
 #' @param decisive Character vector of finishes that count towards a book or
 #'   page verdict. Defaults to `"matte"`.
 #'
-#' @return An object of class `munq_thresholds`.
+#' @return An object of class `munqc_thresholds`.
 #'
 #' @examples
-#' munq_thresholds()
+#' munqc_thresholds()
 #'
 #' # Loosen the per-chip cut on glossy chips as well as excluding them
 #' # from the verdict
-#' munq_thresholds(fail_at = c(matte = 3, semigloss = 3, gloss = 5))
+#' munqc_thresholds(fail_at = c(matte = 3, semigloss = 3, gloss = 5))
 #'
 #' # Let semigloss count towards the verdict too
-#' munq_thresholds(decisive = c("matte", "semigloss"))
+#' munqc_thresholds(decisive = c("matte", "semigloss"))
 #'
 #' # Stricter throughout
-#' munq_thresholds(fail_at = 1)
+#' munqc_thresholds(fail_at = 1)
 #'
 #' @export
-munq_thresholds <- function(
+munqc_thresholds <- function(
   breaks = c(1, 2, 3, 5),
   labels = c(
     "imperceptible",
@@ -171,28 +171,28 @@ munq_thresholds <- function(
       fail_at = fail_at,
       decisive = decisive
     ),
-    class = "munq_thresholds"
+    class = "munqc_thresholds"
   )
 }
 
-#' @rdname munq_thresholds
-#' @param x A `munq_thresholds` object.
+#' @rdname munqc_thresholds
+#' @param x A `munqc_thresholds` object.
 #' @export
-is_munq_thresholds <- function(x) {
-  inherits(x, "munq_thresholds")
+is_munqc_thresholds <- function(x) {
+  inherits(x, "munqc_thresholds")
 }
 
-#' @rdname munq_thresholds
+#' @rdname munqc_thresholds
 #' @param ... Ignored.
 #' @export
-print.munq_thresholds <- function(x, ...) {
+print.munqc_thresholds <- function(x, ...) {
   edges <- c(0, x$breaks, Inf)
   band <- sprintf(
     "[%s, %s)",
     format(edges[-length(edges)], trim = TRUE),
     format(edges[-1L], trim = TRUE)
   )
-  cat("<munq_thresholds>\n\nBands\n")
+  cat("<munqc_thresholds>\n\nBands\n")
   cat(
     paste0(
       "  ",

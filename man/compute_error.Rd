@@ -4,12 +4,12 @@
 \alias{compute_error}
 \title{Score a scan collection against the reference books}
 \usage{
-compute_error(x, thresholds = munq_thresholds())
+compute_error(x, thresholds = munqc_thresholds())
 }
 \arguments{
 \item{x}{A \code{\link[=scan_collection]{scan_collection()}}.}
 
-\item{thresholds}{A \code{\link[=munq_thresholds]{munq_thresholds()}} object. Defaults to failing at
+\item{thresholds}{A \code{\link[=munqc_thresholds]{munqc_thresholds()}} object. Defaults to failing at
 \eqn{\Delta E_{00} \ge 3}.}
 }
 \value{
@@ -32,7 +32,7 @@ sc <- scan_collection(df, sensor = "veykolor")
 compute_error(sc)
 
 # Stricter grading
-compute_error(sc, munq_thresholds(fail_at = 1))
+compute_error(sc, munqc_thresholds(fail_at = 1))
 
 }
 \seealso{

@@ -175,7 +175,7 @@
 #' corresponding chip in [colordata], then grades it against `thresholds`.
 #'
 #' @param x A [scan_collection()].
-#' @param thresholds A [munq_thresholds()] object. Defaults to failing at
+#' @param thresholds A [munqc_thresholds()] object. Defaults to failing at
 #'   \eqn{\Delta E_{00} \ge 3}.
 #'
 #' @return `x` with `$results` and `$thresholds` populated. `$results` is a
@@ -195,15 +195,15 @@
 #' compute_error(sc)
 #'
 #' # Stricter grading
-#' compute_error(sc, munq_thresholds(fail_at = 1))
+#' compute_error(sc, munqc_thresholds(fail_at = 1))
 #'
 #' @export
-compute_error <- function(x, thresholds = munq_thresholds()) {
+compute_error <- function(x, thresholds = munqc_thresholds()) {
   if (!is_scan_collection(x)) {
     stop("`x` must be a ScanCollection. See scan_collection().", call. = FALSE)
   }
-  if (!is_munq_thresholds(thresholds)) {
-    stop("`thresholds` must be a munq_thresholds object.", call. = FALSE)
+  if (!is_munqc_thresholds(thresholds)) {
+    stop("`thresholds` must be a munqc_thresholds object.", call. = FALSE)
   }
 
   ref <- .reference_for(x$sensor)

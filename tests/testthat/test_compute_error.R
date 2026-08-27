@@ -101,12 +101,12 @@ test_that("compute_error validates its arguments", {
   expect_error(compute_error(mtcars), "ScanCollection")
   expect_error(
     compute_error(nix_scan(perfect_scan()), thresholds = 3),
-    "munq_thresholds"
+    "munqc_thresholds"
   )
 })
 
 test_that("thresholds are stored on the result for downstream use", {
-  th <- munq_thresholds(fail_at = 1)
+  th <- munqc_thresholds(fail_at = 1)
   sc <- compute_error(nix_scan(perfect_scan()), th)
   expect_identical(sc$thresholds, th)
 })

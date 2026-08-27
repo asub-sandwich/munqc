@@ -6,8 +6,9 @@
 \usage{
 \method{plot}{ScanCollection}(
   x,
-  type = c("histogram", "ecdf", "page", "finish"),
+  type = c("histogram", "page", "page_space"),
   binwidth = 0.25,
+  scale = c("log", "linear"),
   facet_books = TRUE,
   ...
 )
@@ -15,17 +16,16 @@
 \arguments{
 \item{x}{A \code{ScanCollection} that has been through \code{\link[=compute_error]{compute_error()}}.}
 
-\item{type}{One of \code{"histogram"} (distribution of \eqn{\Delta E_{00}} with
-threshold bands shaded behind it), \code{"ecdf"} (cumulative distribution, so
-you can read off what fraction of chips passes at \emph{any} threshold, not
-just the one you chose), \code{"page"} (one row per Munsell hue page, so a
-single bad page stands out), or \code{"finish"} (one row per surface finish,
-which shows at a glance whether a book's problems are confined to its
-glossy chips).}
+\item{type}{One of \code{"histogram"}, \code{"page"}, \code{"page_space"}.
+Defaults to "\code{histogram}".}
 
 \item{binwidth}{Histogram bin width. Defaults to \code{0.25}.}
 
-\item{facet_books}{Facet by \code{book_id} when more than one book is present.}
+\item{scale}{The scale of the dE axis, one of \code{"log"}, \code{"linear"}. Defaults
+to \code{"log"}.}
+
+\item{facet_books}{Facet by \code{book_id} when more than one book is present.
+Defaults to \code{TRUE}.}
 
 \item{...}{Ignored.}
 }
@@ -37,10 +37,11 @@ Plot a scored scan collection
 }
 \examples{
 \dontrun{
-sc <- compute_error(scan_collection(my_scans, sensor = "nix"))
+sc <- compute_error(scan_collection(my_scan_data, sensor = "nix"))
 plot(sc)
-plot(sc, type = "ecdf")
+plot(sc, binwidth = 0.3)
 plot(sc, type = "page")
+plot(sc, type = "page_space", facet_books = TRUE)
 }
 
 }
