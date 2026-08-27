@@ -6,7 +6,7 @@
 \usage{
 \method{plot}{ScanCollection}(
   x,
-  type = c("histogram", "page", "page_space"),
+  type = c("histogram", "ecdf", "page", "finish", "page_space"),
   binwidth = 0.25,
   scale = c("log", "linear"),
   facet_books = TRUE,
@@ -16,7 +16,7 @@
 \arguments{
 \item{x}{A \code{ScanCollection} that has been through \code{\link[=compute_error]{compute_error()}}.}
 
-\item{type}{One of \code{"histogram"}, \code{"page"}, \code{"page_space"}.
+\item{type}{One of \code{"histogram"}, \code{"ecdf"}, \code{"page"}, \code{"finish"}, \code{"page_space"}.
 Defaults to "\code{histogram}".}
 
 \item{binwidth}{Histogram bin width. Defaults to \code{0.25}.}
@@ -39,7 +39,7 @@ Plot a scored scan collection
 \dontrun{
 sc <- compute_error(scan_collection(my_scan_data, sensor = "nix"))
 plot(sc)
-plot(sc, binwidth = 0.3)
+plot(sc, binwidth = 0.25)
 plot(sc, type = "page")
 plot(sc, type = "page_space", facet_books = TRUE)
 }

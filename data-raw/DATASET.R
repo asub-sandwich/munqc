@@ -144,7 +144,17 @@ stopifnot(
   setequal(metadata$sensor, unique(colordata$sensor))
 )
 
+### Create the "example" data
+example_files <- Sys.glob("data-raw/old-book-data/*.csv")
+example_scans <- read_scan(
+  example_files,
+  sensor = "veykolor",
+  illuminant = "D65",
+  observer = 10
+)
+
 usethis::use_data(colordata_raw, overwrite = TRUE)
 usethis::use_data(colordata, overwrite = TRUE)
 usethis::use_data(metadata, overwrite = TRUE)
 usethis::use_data(chipfinish, overwrite = TRUE)
+usethis::use_data(example_scans, overwrite = TRUE)
