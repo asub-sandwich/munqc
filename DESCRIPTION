@@ -1,8 +1,11 @@
 Package: munqc
-Title: Munsell Color Book Quality Control
+Title: Munsell color book quality control
 Version: 0.0.0.9000
-Authors@R: 
-    person("Ada", "Subora", , "ada.subora@pm.me", role = c("aut", "cre"))
+Authors@R: c(
+    person("Ada", "Subora", , "ada.subora@pm.me", role = c("aut", "cre")),
+    person("Judy", "Turk", role = c("ths", "dtc", "aut")),
+    person("Becky", "Young", role = "dtc"),
+    person("UNL Soil Judging Team", role = "dtc"))
 Description: munqc allows for cheap and rapid testing of Munsell Soil Color Books with digital colorimeters. Users will be able to determine if chips, pages, or entire books need to be replaced by comparing color scans of their books with scans from brand new books.
 License: GPL (>= 3)
 Encoding: UTF-8
