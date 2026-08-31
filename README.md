@@ -94,14 +94,14 @@ data-fig-align="center" data-fig-alt="im a readme example" />
 citation("munqc")
 #> To cite package 'munqc' in publications use:
 #> 
-#>   Subora A (2026). _munqc: Munsell Color Book Quality Control_. R
-#>   package version 0.0.0.9000.
+#>   Subora A, Turk J (2026). _munqc: Munsell color book quality control_.
+#>   R package version 0.0.0.9000.
 #> 
 #> A BibTeX entry for LaTeX users is
 #> 
 #>   @Manual{,
-#>     title = {munqc: Munsell Color Book Quality Control},
-#>     author = {Ada Subora},
+#>     title = {munqc: Munsell color book quality control},
+#>     author = {Ada Subora and Judy Turk},
 #>     year = {2026},
 #>     note = {R package version 0.0.0.9000},
 #>   }
