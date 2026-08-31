@@ -1,5 +1,4 @@
-### This file builds the reference datasets that are shipped with munqc.
-### source("data-raw/DATASET.R")
+# source("data-raw/DATASET.R")
 
 library(dplyr)
 library(purrr)

@@ -8,7 +8,10 @@ FINISHES <- c("matte", "semigloss", "gloss")
   x <- gsub("[^a-z]", "", tolower(trimws(as.character(x))))
   out <- rep(NA_character_, length(x))
   out[x %in% c("matte", "matt", "flat", "dull")] <- "matte"
-  out[x %in% c("semigloss", "semi", "satin", "eggshell")] <- "semigloss"
+  out[
+    x %in%
+      c("semigloss", "semi-gloss", "semi-glossy", "semi", "satin", "eggshell")
+  ] <- "semigloss"
   out[x %in% c("gloss", "glossy", "shiny")] <- "gloss"
   out
 }
@@ -67,7 +70,7 @@ munqc_thresholds <- function(
     "marginal",
     "replace"
   ),
-  fail_at = 3,
+  fail_at = 5,
   decisive = "matte"
 ) {
   if (!is.numeric(breaks) || length(breaks) < 1L || anyNA(breaks)) {

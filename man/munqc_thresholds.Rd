@@ -9,7 +9,7 @@
 munqc_thresholds(
   breaks = c(1, 2, 3, 5),
   labels = c("imperceptible", "perceptible", "acceptable", "marginal", "replace"),
-  fail_at = 3,
+  fail_at = 5,
   decisive = "matte"
 )
 

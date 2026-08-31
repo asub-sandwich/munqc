@@ -178,3 +178,107 @@ print.ScanCollection <- function(x, ...) {
   }
   invisible(x)
 }
+
+###--- Helpers for "book"keeping ;) ---###
+
+#' List the books in a scan collection
+#'
+#' @param x A [scan_collection()].
+#' @return A character vector of unique `book_id` values.
+#' @examples
+#' df <- data.frame(
+#'   book_id = c("book_1", "book_2"),
+#'   chip = "10YR 8/1",
+#'   L = 81.3,
+#'   a = 1.3,
+#'   b = 6.6
+#' )
+#' book_ids(scan_collection(df, sensor = "nix"))
+#' @export
+book_ids <- function(x) {
+  if (!is_scan_collection(x)) {
+    stop("`x` must be a scan collection.", call. = FALSE)
+  }
+  unique(x$data$book_id)
+}
+
+#' Select books from a scan collection
+#'
+#' Subsets a [scan_collection()] to one or more books, including results,
+#' so this can be used before or after [compute_error()].
+#'
+#' @param x A [scan_collection()].
+#' @param book_id A `book_id` or a vector of them.
+#' @param negate If `TRUE`, return every book except those named.
+#'
+#' @return A `ScanCollection`
+#'
+#' @seealso [book_ids()] to see books available.
+#'
+#' @examples
+#' d <- rbind(
+#'   data.frame(book_id = "A", chip = "10YR 8/1", L = 81.3, a = 1.3, b = 6.6),
+#'   data.frame(book_id = "B", chip = "10YR 8/1", L = 79.0, a = 1.1, b = 6.2),
+#'   data.frame(book_id = "C", chip = "10YR 8/1", L = 80.1, a = 1.4, b = 6.9)
+#' )
+#' sc <- scan_collection(d, sensor = "nix")
+#'
+#' books(sc, "A")
+#' books(sc, c("A", "B"))
+#' books(sc, "A", negate = TRUE)
+#'
+#' @export
+subset_ids <- function(x, book_id, negate = FALSE) {
+  if (!is_scan_collection(x)) {
+    stop("`x` must be a scan collection.", call. = FALSE)
+  }
+  if (missing(book_id) || length(book_id) == 0L) {
+    stop("`book_id` must name at least one book.", call. = FALSE)
+  }
+  if (!is.logical(negate) || length(negate) != 1L || is.na(negate)) {
+    stop("`negate` must be TRUE or FALSE.", call. = FALSE)
+  }
+
+  book_id <- as.character(book_id)
+  available <- book_ids(x)
+
+  unknown <- setdiff(book_id, available)
+  if (length(unknown) > 0L) {
+    warning(
+      sprintf(
+        "No such book%s in this collection: %s\n  Available: %s.",
+        if (length(unknown) > 1L) "s" else "",
+        paste(unknown, collapse = ", "),
+        paste(available, collapse = ", ")
+      ),
+      call. = FALSE
+    )
+  }
+
+  keep <- x$data$book_id %in% book_id
+  if (negate) {
+    keep <- !keep
+  }
+
+  if (!any(keep)) {
+    stop(
+      sprintf(
+        "No books left after selection. Available: %s.",
+        paste(available, collapse = ", ")
+      ),
+      call. = FALSE
+    )
+  }
+
+  out <- x
+  out$data <- x$data[keep, , drop = FALSE]
+  rownames(out$data) <- NULL
+
+  if (!is.null(x$results)) {
+    rkeep <- x$results$book_id %in% out$data$book_id
+    out$results <- x$results[rkeep, , drop = FALSE]
+    rownames(out$results) <- NULL
+  }
+
+  out
+}

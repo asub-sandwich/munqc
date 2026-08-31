@@ -1,0 +1,44 @@
+---
+title: "munqc (Munsell Quality Control) package for R"
+format:
+    gfm:
+        embed_resources: true
+knit: (function(inputFile, ...) {
+    quarto::quarto_render(inputFile, output_format = "gfm")
+    })
+---
+
+The idea behind the munqc package was developed to help determine when the 
+UNL soil judging team should consider replacing their Munsell Soil Color books.
+Since the experiment showed interesting results and plots, munqc was developed
+so that other users of Munsell Soil Color books could see how their books were
+standing the test of time.
+
+## Installation
+
+The stable version is not yet available on CRAN...
+
+Development version:
+
+```r
+remotes::install_github("asub-sandwich/munqc", build = FALSE)
+```
+
+## Examples
+
+```{r fig.width = 9, fig.height = 6, fig.alt='im a readme example', fig.caption='im a readme example'}
+# library(munqc)
+
+# example data (the 22 original UNL soil judging team book scans)
+data(example_scans)
+
+# subset the data to only include books 1 and 2
+x <- subset_ids(example_scans, c("book_1", "book_2"))
+
+# compute the errors of the scanned books
+x <- compute_error(x)
+
+# plotting the measured colors on a 'page-space' plot, with empirically-determined
+# tolerance windows
+plot(x, type = "page_spcae")
+```
