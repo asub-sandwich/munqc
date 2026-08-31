@@ -27,7 +27,7 @@ remotes::install_github("asub-sandwich/munqc", build = FALSE)
 ## Examples
 
 ```{r fig.width = 9, fig.height = 6, fig.alt='im a readme example', fig.caption='im a readme example'}
-# library(munqc)
+library(munqc)
 
 # example data (the 22 original UNL soil judging team book scans)
 data(example_scans)
@@ -40,5 +40,5 @@ x <- compute_error(x)
 
 # plotting the measured colors on a 'page-space' plot, with empirically-determined
 # tolerance windows
-plot(x, type = "page_spcae")
+plot(x, type = "page_space")
 ```
