@@ -1,11 +1,16 @@
 ---
 title: "munqc (Munsell Quality Control) package for R"
-format:
-    gfm:
-        embed_resources: true
-knit: (function(inputFile, ...) {
-    quarto::quarto_render(inputFile, output_format = "gfm")
-    })
+output_format: gfm
+knitr:
+    opts_chunk:
+        collapse: true
+        comment: "#>"
+        fig.align: "center"
+        retina: 1.5
+        messaage: false
+        warning: false
+        tidy: false
+
 ---
 
 The idea behind the munqc package was developed to help determine when the 
@@ -26,7 +31,8 @@ remotes::install_github("asub-sandwich/munqc", build = FALSE)
 
 ## Examples
 
-```{r fig.width = 9, fig.height = 6, fig.alt='im a readme example', fig.caption='im a readme example'}
+### Summary of scans and decisions
+```{r example_summary}
 library(munqc)
 
 # example data (the 22 original UNL soil judging team book scans)
@@ -38,7 +44,35 @@ x <- subset_ids(example_scans, c("book_1", "book_2"))
 # compute the errors of the scanned books
 x <- compute_error(x)
 
+# print a summary assessment of your books
+summary(x)
+```
+
+### Scan plotting
+```{r example_plot, fig.width = 9, fig.height = 16, fig.alt='im a readme example', fig.caption='im a readme example'}
+library(munqc)
+
+# example data (the 22 original UNL soil judging team book scans)
+data(example_scans)
+
+# subset the data to only include books 1 and 2
+x <- subset_ids(example_scans, c("book_1", "book_2"))
+
+# compute the errors of the scanned books
+x <- compute_error(x, thresholds = munqc_thresholds(fail_at = 2))
+
 # plotting the measured colors on a 'page-space' plot, with empirically-determined
 # tolerance windows
 plot(x, type = "page_space")
 ```
+
+## Citation
+```{r}
+citation("munqc")
+```
+
+## Related Papers
+* Hopefully coming soon!
+
+## Related Presentations
+* Also hopefully coming soon!

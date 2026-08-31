@@ -270,18 +270,22 @@ plot.ScanCollection <- function(
   windows$hex <- rc$hex[match(windows$chip, ref$chip)]
 
   pc <- .page_coords(res$L, res$a, res$b)
+  center <- match(res$chip, ref$chip)
   pts <- data.frame(
     book_id = res$book_id,
     chip = res$chip,
     hue = res$hue,
     x = pc$x,
     y = pc$y,
+    x0 = rc$x[center],
+    y0 = rc$y[center],
     hex = pc$hex,
     verdict = ifelse(res$fail, "Outside", "Inside"),
     stringsAsFactors = FALSE
   )
 
   pts$draw <- ifelse(res$fail, pts$hex, "grey35")
+  drift <- pts[res$fail, , drop = FALSE]
 
   p <- ggplot2::ggplot() +
     ggplot2::geom_polygon(
@@ -305,6 +309,19 @@ plot.ScanCollection <- function(
         linetype = .data$cut
       ),
       linewidth = 0.4
+    ) +
+    ggplot2::geom_segment(
+      data = drift,
+      ggplot2::aes(
+        x = .data$x0,
+        y = .data$y0,
+        xend = .data$x,
+        yend = .data$y,
+        color = .data$hex
+      ),
+      linewidth = 0.5,
+      alpha = 0.9,
+      lineend = "round"
     ) +
     ggplot2::geom_point(
       data = pts,
@@ -337,7 +354,10 @@ plot.ScanCollection <- function(
     ggplot2::theme_minimal(base_size = 12) +
     ggplot2::theme(
       panel.grid.minor = ggplot2::element_blank(),
-      panel.grid.major = ggplot2::element_line(linewidth = 0.2),
+      panel.grid.major = ggplot2::element_line(
+        linewidth = 0.2,
+        color = "grey35"
+      ),
       legend.position = "right"
     )
 

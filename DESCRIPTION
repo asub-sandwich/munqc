@@ -1,5 +1,5 @@
 Package: munqc
-Title: Munsell Soil Color Book Quality Control
+Title: Munsell Color Book Quality Control
 Version: 0.0.0.9000
 Authors@R: 
     person("Ada", "Subora", , "ada.subora@pm.me", role = c("aut", "cre"))
