@@ -2,7 +2,7 @@
 % Please edit documentation in R/summarize.R
 \name{qc_summary}
 \alias{qc_summary}
-\title{Roll scored chips up to pages and books}
+\title{Summarize scored chips up to pages and books}
 \usage{
 qc_summary(x, max_fail_frac = 0.05)
 }
@@ -13,24 +13,17 @@ qc_summary(x, max_fail_frac = 0.05)
 or book is flagged. Defaults to \code{0.05}.}
 }
 \value{
-A list of four \code{data.frame}s: \code{chip}, \code{page}, \code{finish}, and \code{book}.
-The \code{book} table carries a \code{verdict} column of \code{"pass"} or \code{"replace"}.
+A list of four \code{data.frame}s:
+\describe{
+\item{chip}{One row per scanned chip, as returned by \code{\link[=compute_error]{compute_error()}}.}
+\item{page}{One row per book and Munsell hue.}
+\item{finish}{One row per book and surface finish.}
+\item{book}{One row per book.}
+}
 }
 \description{
 Aggregates the chip-level output of \code{\link[=compute_error]{compute_error()}} to a page (10YR) or
 an entire book.
-}
-\details{
-Only chips whose finish is listed in \code{thresholds$decisive} count towards a
-page or book verdict. By default, this is matte chips only, so a book
-whose matte chips are sound is not condemned because the few glossy
-chips read badly on a sensor. Non-decisive chips are still scored and
-reported, in \verb{$finish} and in the advisory columns of \verb{$book}.
-
-A page or book is flagged when \emph{either} the failure rate among its decisive
-chips exceeds \code{max_fail_frac} \emph{or} their 95th-percentile distance reaches
-the relevant \code{fail_at}. The first catches uniform drift; the second catches
-a book that is fine except for a cluster of ruined chips.
 }
 \examples{
 df <- data.frame(

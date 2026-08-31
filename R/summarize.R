@@ -1,25 +1,19 @@
-#' Roll scored chips up to pages and books
+#' Summarize scored chips up to pages and books
 #'
 #' Aggregates the chip-level output of [compute_error()] to a page (10YR) or
 #' an entire book.
-#'
-#' Only chips whose finish is listed in `thresholds$decisive` count towards a
-#' page or book verdict. By default, this is matte chips only, so a book
-#' whose matte chips are sound is not condemned because the few glossy
-#' chips read badly on a sensor. Non-decisive chips are still scored and
-#' reported, in `$finish` and in the advisory columns of `$book`.
-#'
-#' A page or book is flagged when *either* the failure rate among its decisive
-#' chips exceeds `max_fail_frac` *or* their 95th-percentile distance reaches
-#' the relevant `fail_at`. The first catches uniform drift; the second catches
-#' a book that is fine except for a cluster of ruined chips.
 #'
 #' @param x A `ScanCollection` that has been through [compute_error()].
 #' @param max_fail_frac Proportion of failing decisive chips above which a page
 #'   or book is flagged. Defaults to `0.05`.
 #'
-#' @return A list of four `data.frame`s: `chip`, `page`, `finish`, and `book`.
-#'   The `book` table carries a `verdict` column of `"pass"` or `"replace"`.
+#' @return A list of four `data.frame`s:
+#' \describe{
+#'   \item{chip}{One row per scanned chip, as returned by [compute_error()].}
+#'   \item{page}{One row per book and Munsell hue.}
+#'   \item{finish}{One row per book and surface finish.}
+#'   \item{book}{One row per book.}
+#' }
 #'
 #' @examples
 #' df <- data.frame(
@@ -120,7 +114,7 @@ print.summary.ScanCollection <- function(x, ...) {
   cat(
     "Decisive: ",
     paste(th$decisive, collapse = ", "),
-    "  (other finishes reported but advisory)\n\n",
+    "  (other finishes reported separately)\n\n",
     sep = ""
   )
 
@@ -151,50 +145,41 @@ print.summary.ScanCollection <- function(x, ...) {
     digits = 3
   )
 
-  cat("\nVerdict\n")
+  cat("\nBy book\n")
   print(
     x$book[, c(
       "book_id",
       "n_judged",
       "n_fail",
       "fail_frac",
+      "median_de",
       "p95_de",
-      "n_advisory_fail",
-      "verdict"
+      "max_de",
+      "n_advisory_fail"
     )],
     row.names = FALSE,
     digits = 3
   )
 
-  adv <- sum(x$book$n_advisory_fail)
-  if (adv > 0L && !any(x$book$flagged)) {
-    cat(
-      "\nNote: ",
-      adv,
-      " non-decisive chip(s) failed but did not affect the ",
-      "verdict.\n",
-      sep = ""
-    )
-  }
-
-  flagged <- x$page[x$page$flagged, , drop = FALSE]
-  if (nrow(flagged) > 0L) {
-    cat("\nFlagged pages\n")
+  pages <- x$page[x$page$n_fail > 0L, , drop = FALSE]
+  if (nrow(pages) > 0L) {
+    cat("\nPages with failing chips\n")
     print(
-      flagged[, c(
+      pages[, c(
         "book_id",
         "hue",
         "n_judged",
         "n_fail",
         "fail_frac",
-        "p95_de",
+        "median_de",
+        "max_de",
         "worst_chip"
       )],
       row.names = FALSE,
       digits = 3
     )
   } else {
-    cat("\nNo pages flagged.\n")
+    cat("\nNo failing chips on any page.\n")
   }
   invisible(x)
 }

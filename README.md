@@ -37,7 +37,7 @@ x <- compute_error(x)
 summary(x)
 #> <ScanCollection QC summary>
 #> Sensor:   veykolor
-#> Decisive: matte  (other finishes reported but advisory)
+#> Decisive: matte  (other finishes reported separately)
 #> 
 #> Grade distribution
 #>   imperceptible       12  (16.7%)
@@ -55,15 +55,15 @@ summary(x)
 #>   book_2     matte      30      2      2.75   5.73   6.86     TRUE
 #>   book_2 semigloss       1      0      2.06   2.06   2.06    FALSE
 #> 
-#> Verdict
-#>  book_id n_judged n_fail fail_frac p95_de n_advisory_fail verdict
-#>   book_1       30      3    0.1000   7.81               0 replace
-#>   book_2       30      2    0.0667   5.73               0 replace
+#> By book
+#>  book_id n_judged n_fail fail_frac median_de p95_de max_de n_advisory_fail
+#>   book_1       30      3    0.1000      1.86   7.81   8.80               0
+#>   book_2       30      2    0.0667      2.75   5.73   6.86               0
 #> 
-#> Flagged pages
-#>  book_id  hue n_judged n_fail fail_frac p95_de worst_chip
-#>   book_1 10YR       30      3    0.1000   7.81   10YR 8/1
-#>   book_2 10YR       30      2    0.0667   5.73   10YR 8/2
+#> Pages with failing chips
+#>  book_id  hue n_judged n_fail fail_frac median_de max_de worst_chip
+#>   book_1 10YR       30      3    0.1000      1.86   8.80   10YR 8/1
+#>   book_2 10YR       30      2    0.0667      2.75   6.86   10YR 8/2
 ```
 
 ### Scan plotting
