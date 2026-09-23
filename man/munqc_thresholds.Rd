@@ -7,9 +7,9 @@
 \title{Quality-control thresholds and policy}
 \usage{
 munqc_thresholds(
-  breaks = c(1, 2, 3, 5),
-  labels = c("imperceptible", "perceptible", "acceptable", "marginal", "replace"),
-  fail_at = 5,
+  breaks = c(1, 2, 4, 6, 10),
+  labels = c("imperceptible", "low", "moderate", "high", "very high", "unacceptable"),
+  fail_at = 2,
   decisive = "matte"
 )
 
@@ -27,7 +27,7 @@ is_munqc_thresholds(x)
 numeric vector giving a per-finish cut, e.g.
 \code{c(matte = 3, semigloss = 4, gloss = 5)}. Unnamed finishes inherit the
 \code{matte} value. Every value must be one of \code{breaks}, so the pass/fail line
-always coincides with a band edge.}
+always coincides with a band edge. Defaults to \code{c(matte = 2)}.}
 
 \item{decisive}{Character vector of finishes that count towards a book or
 page verdict. Defaults to \code{"matte"}.}
@@ -61,9 +61,8 @@ its \eqn{\Delta E_{00}} is at or above the cut. This may vary by finish.
 \examples{
 munqc_thresholds()
 
-# Loosen the per-chip cut on glossy chips as well as excluding them
-# from the verdict
-munqc_thresholds(fail_at = c(matte = 3, semigloss = 3, gloss = 5))
+# Loosen the per-chip cut on glossy chips
+munqc_thresholds(fail_at = c(matte = 2, semigloss = 4, gloss = 5))
 
 # Let semigloss count towards the verdict too
 munqc_thresholds(decisive = c("matte", "semigloss"))

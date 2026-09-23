@@ -53,12 +53,10 @@ Reads one or more scan files and returns a \code{\link[=scan_collection]{scan_co
 \details{
 Column names are detected automatically where possible: \code{chip}, \code{L}, \code{a},
 \code{b} and common variants (\verb{L*}, \code{lightness}, \code{munsell}, \code{book}, ...) are
-recognised case-insensitively and ignoring punctuation. Anything the
-detector cannot find, or finds twice, must be named explicitly.
+recognised. Anything not found or that is ambiguous must be made explicit.
 
 Chips may be given either as condensed notation in a single column
-(\code{"10YR 8/1"}) or as separate \code{hue}, \code{value} and \code{chroma} columns, which are
-joined for you.
+(\code{"10YR 8/1"}) or as separate \code{hue}, \code{value} and \code{chroma} columns.
 }
 \examples{
 f <- tempfile(fileext = ".csv")

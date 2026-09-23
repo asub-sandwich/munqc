@@ -91,7 +91,12 @@ plot.ScanCollection <- function(
   }
 
   if (type == "page_space") {
-    return(.plot_page_space(x, res, bands = NULL, facet_books = facet_books))
+    return(.plot_page_space(
+      x,
+      res,
+      bands = NULL,
+      facet_books = facet_books
+    ))
   }
   th <- x$thresholds
   bands <- .band_frame(th, upper = max(res$delta_e_2000, na.rm = TRUE))
@@ -130,7 +135,6 @@ plot.ScanCollection <- function(
       ggplot2::labs(
         x = expression(Delta * E["00"]),
         y = "Chips",
-        title = "Color difference from reference",
         subtitle = sprintf(
           "%s  |  %d of %d chips failing (%d decisive, %d advisory)",
           x$sensor,
@@ -161,7 +165,6 @@ plot.ScanCollection <- function(
       ggplot2::labs(
         x = expression(Delta * E["00"]),
         y = "Chips at or below",
-        title = "Cumulative color difference",
         subtitle = "Read off the pass rate at any threshold, not just the chosen one"
       ),
 
@@ -186,7 +189,6 @@ plot.ScanCollection <- function(
       ggplot2::labs(
         x = expression(Delta * E["00"]),
         y = "Page (Munsell hue)",
-        title = "Color difference by page"
       ),
 
     finish = ggplot2::ggplot(res) +
@@ -222,7 +224,6 @@ plot.ScanCollection <- function(
       ggplot2::labs(
         x = expression(Delta * E["00"]),
         y = "Surface finish",
-        title = "Color difference by chip finish",
         subtitle = sprintf(
           "Verdict decided by: %s",
           paste(th$decisive, collapse = ", ")
@@ -232,7 +233,7 @@ plot.ScanCollection <- function(
 
   p <- p +
     ggplot2::scale_fill_manual(values = pal, name = NULL, drop = FALSE) +
-    ggplot2::theme_minimal(base_size = 12) +
+    ggplot2::theme_minimal() +
     ggplot2::theme(
       panel.grid.minor = ggplot2::element_blank(),
       legend.position = "bottom"
@@ -251,7 +252,12 @@ plot.ScanCollection <- function(
 #' and value increasing along the y-axis. Also wraps the center of each
 #' color in a tolerance window.
 #' @noRd
-.plot_page_space <- function(x, res, bands = NULL, facet_books = TRUE) {
+.plot_page_space <- function(
+  x,
+  res,
+  bands = NULL,
+  facet_books = TRUE
+) {
   th <- x$thresholds
   ref <- colordata[colordata$sensor == x$sensor, c("chip", "L", "a", "b")]
   ref <- ref[ref$chip %in% res$chip, , drop = FALSE]
@@ -280,7 +286,7 @@ plot.ScanCollection <- function(
     x0 = rc$x[center],
     y0 = rc$y[center],
     hex = pc$hex,
-    verdict = ifelse(res$fail, "Outside", "Inside"),
+    verdict = ifelse(res$fail, "No", "Yes"),
     stringsAsFactors = FALSE
   )
 
@@ -317,10 +323,10 @@ plot.ScanCollection <- function(
         y = .data$y0,
         xend = .data$x,
         yend = .data$y,
-        color = .data$hex
       ),
       linewidth = 0.5,
-      alpha = 0.9,
+      alpha = 0.7,
+      color = "#999999",
       lineend = "round"
     ) +
     ggplot2::geom_point(
@@ -336,22 +342,21 @@ plot.ScanCollection <- function(
     ) +
     ggplot2::scale_color_identity() +
     ggplot2::scale_fill_identity() +
-    ggplot2::scale_shape_manual(values = c(Inside = 1, Outside = 16)) +
-    ggplot2::scale_x_continuous(breaks = c(0, 1, 2, 3, 4, 6, 8)) +
-    ggplot2::scale_y_continuous(breaks = c(0, 1, 2, 3, 4, 5, 6, 7, 8)) +
+    ggplot2::scale_shape_manual(values = c(Yes = 1, No = 16)) +
+    ggplot2::scale_x_continuous(breaks = c(1, 2, 3, 4, 6, 8)) +
+    ggplot2::scale_y_continuous(breaks = c(2, 3, 4, 5, 6, 7, 8)) +
     ggplot2::labs(
       x = expression("Chroma (" * C^"*" / 6.72 * ")"),
       y = expression("Value  (" * L^"*" / 10 * ")"),
       shape = "In tolerance?",
       linetype = expression(Delta * E["00"] * " window"),
-      title = "Chips in Munsell page space"
     ) +
     ggplot2::coord_fixed(
       ratio = 1,
-      xlim = c(0, 10),
-      ylim = c(0, 10)
+      xlim = c(0, 9.5),
+      ylim = c(1.5, 9)
     ) +
-    ggplot2::theme_minimal(base_size = 12) +
+    ggplot2::theme_minimal() +
     ggplot2::theme(
       panel.grid.minor = ggplot2::element_blank(),
       panel.grid.major = ggplot2::element_line(

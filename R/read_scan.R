@@ -2,7 +2,7 @@
 #' @noRd
 .norm_name <- function(x) gsub("[^a-z0-9]", "", tolower(x))
 
-#' Candidate column names for each role
+#' common names
 #' @noRd
 COLUMN_CANDIDATES <- list(
   chip = c(
@@ -29,9 +29,7 @@ COLUMN_CANDIDATES <- list(
 
 #' Resolve one role to a column in `nms`
 #'
-#' Returns the column name, or NA if nothing matched. Errors when the guess is
-#' ambiguous, because silently picking one of two plausible columns is worse
-#' than making the user say which they meant.
+#' Returns the column name or NA.
 #' @noRd
 .match_column <- function(role, nms, explicit = NULL) {
   if (!is.null(explicit)) {
@@ -118,12 +116,10 @@ COLUMN_CANDIDATES <- list(
 #'
 #' Column names are detected automatically where possible: `chip`, `L`, `a`,
 #' `b` and common variants (`L*`, `lightness`, `munsell`, `book`, ...) are
-#' recognised case-insensitively and ignoring punctuation. Anything the
-#' detector cannot find, or finds twice, must be named explicitly.
+#' recognised. Anything not found or that is ambiguous must be made explicit.
 #'
 #' Chips may be given either as condensed notation in a single column
-#' (`"10YR 8/1"`) or as separate `hue`, `value` and `chroma` columns, which are
-#' joined for you.
+#' (`"10YR 8/1"`) or as separate `hue`, `value` and `chroma` columns.
 #'
 #' @param path Path to a `.csv`, `.tsv`, `.txt`, `.xlsx` or `.xls` file. May be
 #'   a vector of paths, in which case each file becomes one book.

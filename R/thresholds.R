@@ -41,7 +41,7 @@ FINISHES <- c("matte", "semigloss", "gloss")
 #'   numeric vector giving a per-finish cut, e.g.
 #'   `c(matte = 3, semigloss = 4, gloss = 5)`. Unnamed finishes inherit the
 #'   `matte` value. Every value must be one of `breaks`, so the pass/fail line
-#'   always coincides with a band edge.
+#'   always coincides with a band edge. Defaults to `c(matte = 2)`.
 #' @param decisive Character vector of finishes that count towards a book or
 #'   page verdict. Defaults to `"matte"`.
 #'
@@ -50,9 +50,8 @@ FINISHES <- c("matte", "semigloss", "gloss")
 #' @examples
 #' munqc_thresholds()
 #'
-#' # Loosen the per-chip cut on glossy chips as well as excluding them
-#' # from the verdict
-#' munqc_thresholds(fail_at = c(matte = 3, semigloss = 3, gloss = 5))
+#' # Loosen the per-chip cut on glossy chips
+#' munqc_thresholds(fail_at = c(matte = 2, semigloss = 4, gloss = 5))
 #'
 #' # Let semigloss count towards the verdict too
 #' munqc_thresholds(decisive = c("matte", "semigloss"))
@@ -62,15 +61,16 @@ FINISHES <- c("matte", "semigloss", "gloss")
 #'
 #' @export
 munqc_thresholds <- function(
-  breaks = c(1, 2, 3, 5),
+  breaks = c(1, 2, 4, 6, 10),
   labels = c(
     "imperceptible",
-    "perceptible",
-    "acceptable",
-    "marginal",
-    "replace"
+    "low",
+    "moderate",
+    "high",
+    "very high",
+    "unacceptable"
   ),
-  fail_at = 5,
+  fail_at = 2,
   decisive = "matte"
 ) {
   if (!is.numeric(breaks) || length(breaks) < 1L || anyNA(breaks)) {
