@@ -8,7 +8,7 @@
 \usage{
 munqc_thresholds(
   breaks = c(1, 2, 4, 6, 10),
-  labels = c("imperceptible", "low", "moderate", "high", "very high", "unacceptable"),
+  labels = c("Imperceptible", "Low", "Moderate", "High", "Very High", "Unacceptable"),
   fail_at = 2,
   decisive = "matte"
 )

@@ -103,7 +103,6 @@ plot.ScanCollection <- function(
   pal <- stats::setNames(.band_palette(length(th$labels)), th$labels)
   multi_book <- length(unique(res$book_id)) > 1L
 
-  # One dashed line per distinct fail cut, so a per-finish policy is visible.
   fail_line <- ggplot2::geom_vline(
     xintercept = unique(th$fail_at),
     linetype = "dashed",
@@ -114,35 +113,39 @@ plot.ScanCollection <- function(
   p <- switch(
     type,
     histogram = ggplot2::ggplot(res) +
-      ggplot2::geom_rect(
-        data = bands,
-        ggplot2::aes(xmin = .data$xmin, xmax = .data$xmax, fill = .data$grade),
-        ymin = -Inf,
-        ymax = Inf,
-        alpha = 0.4
-      ) +
+      # ggplot2::geom_rect(
+      #   data = bands,
+      #   ggplot2::aes(xmin = .data$xmin, xmax = .data$xmax, fill = .data$grade),
+      #   ymin = -Inf,
+      #   ymax = Inf,
+      #   alpha = 0.4
+      # ) +
       ggplot2::geom_histogram(
-        ggplot2::aes(x = .data$delta_e_2000),
+        ggplot2::aes(x = .data$delta_e_2000, fill = .data$grade),
         binwidth = binwidth,
         boundary = 0,
-        fill = "grey25",
-        color = "white",
+        color = "black",
         linewidth = 0.2,
         alpha = 0.85
       ) +
-      fail_line +
+      # fail_line +
+      ggplot2::geom_vline(
+        aes(
+          xintercept = median(.data$delta_e_2000),
+          linetype = "Median"
+        ),
+        linewidth = 1.5,
+        alpha = 0.8,
+        key_glyph = "path"
+      ) +
       log_x +
       ggplot2::labs(
         x = expression(Delta * E["00"]),
         y = "Chips",
-        subtitle = sprintf(
-          "%s  |  %d of %d chips failing (%d decisive, %d advisory)",
-          x$sensor,
-          sum(res$fail),
-          nrow(res),
-          sum(res$fail & res$decisive),
-          sum(res$fail & !res$decisive)
-        )
+        linetype = ""
+      ) +
+      ggplot2::scale_linetype_manual(
+        values = c("Median" = "dashed")
       ),
 
     ecdf = ggplot2::ggplot(res) +
@@ -165,7 +168,6 @@ plot.ScanCollection <- function(
       ggplot2::labs(
         x = expression(Delta * E["00"]),
         y = "Chips at or below",
-        subtitle = "Read off the pass rate at any threshold, not just the chosen one"
       ),
 
     page = ggplot2::ggplot(res) +
@@ -224,10 +226,6 @@ plot.ScanCollection <- function(
       ggplot2::labs(
         x = expression(Delta * E["00"]),
         y = "Surface finish",
-        subtitle = sprintf(
-          "Verdict decided by: %s",
-          paste(th$decisive, collapse = ", ")
-        )
       )
   )
 
